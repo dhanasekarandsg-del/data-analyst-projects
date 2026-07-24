@@ -1,0 +1,266 @@
+CREATE DATABASE Hospital_Insurance;
+USE Hospital_Insurance;
+CREATE TABLE Patients (
+    patient_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    gender VARCHAR(10),
+    date_of_birth DATE,
+    phone VARCHAR(15),
+    email VARCHAR(100),
+    address VARCHAR(200)
+);
+insert into Patients
+(first_name, last_name, gender, date_of_birth, phone, email, address)
+VALUES
+('Arun','Kumar','Male','1995-05-15','9876543210','arun@gmail.com','Chennai'),
+('Priya','Ravi','Female','1998-08-22','9876543211','priya@gmail.com','Coimbatore'),
+('Karthik','S','Male','1992-02-10','9876543212','karthik@gmail.com','Madurai'),
+('Divya','M','Female','1997-11-18','9876543213','divya@gmail.com','Salem'),
+('Rahul','K','Male','1994-07-05','9876543214','rahul@gmail.com','Trichy');
+
+CREATE TABLE Doctors (
+    doctor_id INT PRIMARY KEY AUTO_INCREMENT,
+    doctor_name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100),
+    phone VARCHAR(15),
+    email VARCHAR(100),
+    experience_years INT
+);
+drop table Doctors;
+INSERT INTO Doctors
+(doctor_name, specialization, phone, email, experience_years)
+VALUES
+('Dr. Ramesh','Cardiology','9123456780','ramesh@hospital.com',15),
+('Dr. Meena','Neurology','9123456781','meena@hospital.com',10),
+('Dr. Prakash','Orthopedics','9123456782','prakash@hospital.com',12),
+('Dr. Anitha','Dermatology','9123456783','anitha@hospital.com',8),
+('Dr. Kumar','General Medicine','9123456784','kumar@hospital.com',20);
+
+CREATE TABLE Insurance_Companies (
+    company_id INT PRIMARY KEY AUTO_INCREMENT,
+    company_name VARCHAR(100) NOT NULL,
+    contact_person VARCHAR(100),
+    phone VARCHAR(15),
+    email VARCHAR(100),
+    address VARCHAR(200)
+);
+
+INSERT INTO Insurance_Companies
+(company_name, contact_person, phone, email, address)
+VALUES
+('Star Health','Ravi','9000000001','star@insurance.com','Chennai'),
+('ICICI Lombard','Arun','9000000002','icici@insurance.com','Bangalore'),
+('HDFC ERGO','Priya','9000000003','hdfc@insurance.com','Mumbai'),
+('Care Health','Kiran','9000000004','care@insurance.com','Delhi'),
+('Niva Bupa','Suresh','9000000005','niva@insurance.com','Hyderabad');
+
+CREATE TABLE Insurance_Policies (
+    policy_id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id INT,
+    company_id INT,
+    policy_number VARCHAR(50) UNIQUE,
+    coverage_amount DECIMAL(10,2),
+    start_date DATE,
+    end_date DATE,
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (company_id) REFERENCES Insurance_Companies(company_id)
+);
+
+INSERT INTO Insurance_Policies
+(patient_id, company_id, policy_number, coverage_amount, start_date, end_date)
+VALUES
+(1,1,'POL1001',500000,'2025-01-01','2026-01-01'),
+(2,2,'POL1002',300000,'2025-02-01','2026-02-01'),
+(3,3,'POL1003',700000,'2025-03-01','2026-03-01'),
+(4,4,'POL1004',400000,'2025-04-01','2026-04-01'),
+(5,5,'POL1005',600000,'2025-05-01','2026-05-01');
+
+CREATE TABLE Appointments (
+    appointment_id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id INT,
+    doctor_id INT,
+    appointment_date DATE,
+    appointment_time TIME,
+    status VARCHAR(20),
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(doctor_id)
+);
+
+INSERT INTO Appointments
+(patient_id, doctor_id, appointment_date, appointment_time, status)
+VALUES
+(1,1,'2026-07-01','09:00:00','Completed'),
+(2,2,'2026-07-02','10:00:00','Completed'),
+(3,3,'2026-07-03','11:00:00','Completed'),
+(4,4,'2026-07-04','12:00:00','Scheduled'),
+(5,5,'2026-07-05','02:00:00','Completed');
+
+CREATE TABLE Treatments (
+    treatment_id INT PRIMARY KEY AUTO_INCREMENT,
+    appointment_id INT,
+    diagnosis VARCHAR(200),
+    treatment_name VARCHAR(100),
+    treatment_cost DECIMAL(10,2),
+    FOREIGN KEY (appointment_id) REFERENCES Appointments(appointment_id)
+);
+
+INSERT INTO Treatments
+(appointment_id, diagnosis, treatment_name, treatment_cost)
+VALUES
+(1,'Heart Pain','ECG',5000),
+(2,'Migraine','Brain Scan',8000),
+(3,'Leg Fracture','Bone Surgery',50000),
+(4,'Skin Allergy','Skin Therapy',3000),
+(5,'Fever','General Checkup',1500);
+
+CREATE TABLE Bills (
+    bill_id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id INT,
+    treatment_id INT,
+    bill_date DATE,
+    total_amount DECIMAL(10,2),
+    payment_status VARCHAR(20),
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (treatment_id) REFERENCES Treatments(treatment_id)
+);
+
+INSERT INTO Bills
+(patient_id, treatment_id, bill_date, total_amount, payment_status)
+VALUES
+(1,1,'2026-07-01',5500,'Paid'),
+(2,2,'2026-07-02',8500,'Pending'),
+(3,3,'2026-07-03',55000,'Pending'),
+(4,4,'2026-07-04',3500,'Paid'),
+(5,5,'2026-07-05',2000,'Paid');
+
+CREATE TABLE Insurance_Claims (
+    claim_id INT PRIMARY KEY AUTO_INCREMENT,
+    bill_id INT,
+    policy_id INT,
+    claim_date DATE,
+    claim_amount DECIMAL(10,2),
+    claim_status VARCHAR(20),
+    FOREIGN KEY (bill_id) REFERENCES Bills(bill_id),
+    FOREIGN KEY (policy_id) REFERENCES Insurance_Policies(policy_id)
+);
+
+INSERT INTO Insurance_Claims
+(bill_id, policy_id, claim_date, claim_amount, claim_status)
+VALUES
+(1,1,'2026-07-02',5000,'Approved'),
+(2,2,'2026-07-03',8000,'Pending'),
+(3,3,'2026-07-04',50000,'Approved'),
+(4,4,'2026-07-05',3000,'Rejected'),
+(5,5,'2026-07-06',1500,'Approved');
+
+CREATE TABLE Claim_Payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    claim_id INT,
+    payment_date DATE,
+    amount_paid DECIMAL(10,2),
+    payment_method VARCHAR(30),
+    FOREIGN KEY (claim_id) REFERENCES Insurance_Claims(claim_id)
+);
+
+INSERT INTO Claim_Payments
+(claim_id, payment_date, amount_paid, payment_method)
+VALUES
+(1,'2026-07-03',5000,'Bank Transfer'),
+(3,'2026-07-05',50000,'NEFT'),
+(5,'2026-07-07',1500,'UPI');
+
+-- Verify the data;
+SELECT * FROM Patients;
+SELECT * FROM Doctors;
+SELECT * FROM Insurance_Companies;
+SELECT * FROM Insurance_Policies;
+SELECT * FROM Appointments;
+SELECT * FROM Treatments;
+SELECT * FROM Bills;
+SELECT * FROM Insurance_Claims;
+SELECT * FROM 
+Claim_Payments;
+
+select first_name, last_name from patients;
+select * from doctors where  experience_years  >10;  
+  select * from doctor_name where  experience_years  >10;  
+select * from Insurance_Policies where  coverage_amount  >500000;  
+select * from Appointments where Appointment_date >'2026-07-02';
+SELECT * from Insurance_Claims where claim_status =' approved';
+SELECT p.first_name,
+       p.last_name,
+       ip.policy_number
+FROM Patients p
+JOIN Insurance_Policies ip
+ON p.patient_id = ip.patient_id;
+SELECT p.first_name,
+       p.last_name,
+       d.doctor_name
+FROM Appointments a
+JOIN Patients p
+ON a.patient_id = p.patient_id
+JOIN Doctors d
+ON a.doctor_id = d.doctor_id;
+
+SELECT COUNT(*) AS total_patients
+FROM Patients;
+
+SELECT SUM(total_amount) AS total_bill_amount
+FROM Bills;
+
+SELECT AVG(treatment_cost) AS average_treatment_cost
+FROM Treatments;
+SELECT MAX(claim_amount) AS highest_claim_amount
+FROM Insurance_Claims;
+
+SELECT d.doctor_name,
+       COUNT(a.patient_id) AS total_patients
+FROM Doctors d
+JOIN Appointments a
+ON d.doctor_id = a.doctor_id
+GROUP BY d.doctor_name;
+
+SELECT p.first_name,
+       p.last_name,
+       b.total_amount
+FROM Patients p
+JOIN Bills b
+ON p.patient_id = b.patient_id
+ORDER BY b.total_amount DESC
+LIMIT 1;
+
+SELECT d.doctor_name,
+       COUNT(a.patient_id) AS total_patients
+FROM Doctors d
+JOIN Appointments a
+ON d.doctor_id = a.doctor_id
+GROUP BY d.doctor_name
+ORDER BY total_patients DESC
+LIMIT 1;
+
+SELECT p.first_name,
+       p.last_name
+FROM Patients p
+LEFT JOIN Insurance_Policies ip
+ON p.patient_id = ip.patient_id
+LEFT JOIN Insurance_Claims ic
+ON ip.policy_id = ic.policy_id
+WHERE ic.claim_id IS NULL;
+
+SELECT ic.company_name,
+       SUM(c.claim_amount) AS total_claim
+FROM Insurance_Companies ic
+JOIN Insurance_Policies ip
+ON ic.company_id = ip.company_id
+JOIN Insurance_Claims c
+ON ip.policy_id = c.policy_id
+GROUP BY ic.company_name
+ORDER BY total_claim DESC
+LIMIT 1;
+
+SELECT treatment_name,
+       treatment_cost
+FROM Treatments
+ORDER BY treatment_cost DESC
+LIMIT 3;
